@@ -24,7 +24,7 @@ OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 
 # Build flags, includes, links
 CXXFLAGS = -std=c++11 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
-CXXFLAGS += -I$(PA_DIR)/include #$(PA_DIR)/lib/.libs/libportaudio.a
+CXXFLAGS += -I$(PA_DIR)/include 
 CXXFLAGS += -I./include
 CXXFLAGS += -g -Wall -Wformat -pthread
 
@@ -50,3 +50,35 @@ CXXFLAGS += -I/usr/local/include -I/opt/local/include
 
 $(EXEC): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+
+install-deps: install-portaudio install-imgui
+.PHONY: install-deps
+
+uninstall-deps: uninstall-portaudio uninstall-imgui
+.PHONY: uninstall-deps
+
+install-portaudio:
+	mkdir -p libs
+
+	curl https://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz | tar -zx -C lib
+	cd $(PA_DIR) && ./configure && $(MAKE) -j
+.PHONY: install-portaudio
+
+uninstall-portaudio:
+	cd $(PA_DIR) && $(MAKE) uninstall
+	rm -rf $(PA_DIR)
+.PHONY: uninstall-portaudio
+
+install-imgui:
+	mkdir -p libs
+	cd libs
+	git clone https://github.com/ocornut/imgui
+.PHONY: install-imgui
+
+uninstall-imgui:
+	rm -rf $(IMGUI_DIR)
+.PHONY: uninstall-imgui
+
+clean:
+	rm -f $(OBJS) imgui.ini
+.PHONY: clean
