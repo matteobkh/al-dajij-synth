@@ -53,8 +53,7 @@ static int paCallback( const void *inputBuffer, void *outputBuffer,
         }
 
         // Apply filter
-        
-        // mix = data->filter.process(mix);
+        mix = data->filter.process(mix);
 
         // Apply master volume
         mix *= data->masterVolume.load();

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <atomic>
 #include <iostream>
+#include <mutex>
 
 #ifndef M_PI
 #define M_PI  (3.14159265)
@@ -14,6 +15,7 @@ class LowPassFilter {
 private:
     float prev;  // Previous output sample
     float alpha; // Filter coefficient
+    std::mutex filterMutex; // Protects prev
 
 public:
     int sampleRate;
@@ -38,7 +40,8 @@ public:
     float process(float input) {
         if (passthrough)
             return input;
-        
+
+        std::lock_guard<std::mutex> lock(filterMutex); // Prevent race conditions
         prev = prev + alpha * (input - prev);
         return prev;
     }

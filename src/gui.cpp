@@ -18,7 +18,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::RadioButton("Sine", wf, 0);   ImGui::SameLine();
         ImGui::RadioButton("Square", wf, 1); ImGui::SameLine();
         ImGui::RadioButton("Saw", wf, 2);
-        if (ImGui::SliderFloat("Freq", &freq, 20.0f, 2000.0f)) {
+        if (ImGui::SliderFloat("Freq", &freq, 20.0f, 5000.0f, NULL, ImGuiSliderFlags_Logarithmic)) {
             audioEngine.oscillators[i]->frequency.store(freq);
         }
         if (ImGui::SliderFloat("Vol", &vol, 0.0f, 1.0f)) {
@@ -39,14 +39,14 @@ void renderGUI(AudioEngine& audioEngine) {
 
     ImGui::Checkbox("Filter passthrough", &audioEngine.filter.passthrough);
     float cutoff = audioEngine.filter.frequency.load();
-    if (ImGui::SliderFloat("Filter cutoff", &cutoff, 20.0f, 20000.0f)) {
+    if (ImGui::SliderFloat("Filter cutoff", &cutoff, 20.0f, 20000.0f, NULL, ImGuiSliderFlags_Logarithmic)) {
         audioEngine.filter.frequency.store(cutoff);
         audioEngine.filter.updateAlpha();
     }
 
-    ImGui::Text("Master Volume");
+    //ImGui::Text("Master Volume");
     float mVol = audioEngine.masterVolume.load();
-    if (ImGui::SliderFloat("v", &mVol, 0.0f, 1.0f)) {
+    if (ImGui::SliderFloat("Master Volume", &mVol, 0.0f, 1.0f)) {
         audioEngine.masterVolume.store(mVol);
     }
 
