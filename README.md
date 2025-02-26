@@ -1,0 +1,2 @@
+## Basic tone generator with GUI
+Starting point for cross-platform graphical audio apps. Uses [PortAudio](https://github.com/PortAudio/portaudio) and [Dear ImGui](https://github.com/ocornut/imgui) using SDL2 and OpenGL3. Current makefile only works for MacOS (10.6+). Clone repo and run `make install-deps` then `make`. See requirements  here: [Building PortAudio for Mac](https://files.portaudio.com/docs/v19-doxydocs/compile_mac_coreaudio.html).
