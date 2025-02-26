@@ -31,7 +31,7 @@ CXXFLAGS += -g -Wall -Wformat -pthread
 LIBS = -framework OpenGL -framework Cocoa -framework IOKit \
 	-framework CoreVideo -framework CoreAudio -framework AudioToolbox \
 	-framework AudioUnit -framework CoreServices \
-	-L/usr/local/lib -L/opt/local/lib $(shell sdl2-config --libs) \
+	$(shell sdl2-config --libs) \
 	$(PA_DIR)/lib/.libs/libportaudio.a
 
 CXXFLAGS += `sdl2-config --cflags`
@@ -59,8 +59,7 @@ uninstall-deps: uninstall-portaudio uninstall-imgui
 
 install-portaudio:
 	mkdir -p libs
-
-	curl https://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz | tar -zx -C lib
+	cd libs && git clone https://github.com/PortAudio/portaudio
 	cd $(PA_DIR) && ./configure && $(MAKE) -j
 .PHONY: install-portaudio
 
@@ -71,8 +70,7 @@ uninstall-portaudio:
 
 install-imgui:
 	mkdir -p libs
-	cd libs
-	git clone https://github.com/ocornut/imgui
+	cd libs && git clone https://github.com/ocornut/imgui
 .PHONY: install-imgui
 
 uninstall-imgui:
