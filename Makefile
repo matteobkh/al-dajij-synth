@@ -51,31 +51,13 @@ CXXFLAGS += -I/usr/local/include -I/opt/local/include
 $(EXEC): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
-install-deps: install-portaudio install-imgui
-.PHONY: install-deps
-
-uninstall-deps: uninstall-portaudio uninstall-imgui
-.PHONY: uninstall-deps
-
 install-portaudio:
-	mkdir -p libs
-	cd libs && git clone https://github.com/PortAudio/portaudio
 	cd $(PA_DIR) && ./configure && $(MAKE) -j
 .PHONY: install-portaudio
 
 uninstall-portaudio:
 	cd $(PA_DIR) && $(MAKE) uninstall
-	rm -rf $(PA_DIR)
 .PHONY: uninstall-portaudio
-
-install-imgui:
-	mkdir -p libs
-	cd libs && git clone https://github.com/ocornut/imgui
-.PHONY: install-imgui
-
-uninstall-imgui:
-	rm -rf $(IMGUI_DIR)
-.PHONY: uninstall-imgui
 
 clean:
 	rm -f $(OBJS) imgui.ini
