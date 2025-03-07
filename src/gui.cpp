@@ -13,6 +13,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::PushID(i);
         ImGui::Text("Oscillator %d", (int)i+1);
         float freq = audioEngine.oscillators[i]->frequency.load();
+        float pan = audioEngine.oscillators[i]->pan.load();
         float vol = audioEngine.oscillators[i]->volume.load();
         int* wf = &(audioEngine.oscillators[i]->waveform);
         ImGui::RadioButton("Sine", wf, 0);   ImGui::SameLine();
@@ -21,7 +22,11 @@ void renderGUI(AudioEngine& audioEngine) {
         if (ImGui::SliderFloat("Freq", &freq, 20.0f, 5000.0f, NULL, ImGuiSliderFlags_Logarithmic)) {
             audioEngine.oscillators[i]->frequency.store(freq);
         }
-        if (ImGui::SliderFloat("Vol", &vol, 0.0f, 1.0f)) {
+        ImGui::Text("L"); ImGui::SameLine();
+        if (ImGui::SliderFloat("R", &pan, 0.0f, 1.0f)) {
+            audioEngine.oscillators[i]->pan.store(pan);
+        }
+        if (ImGui::SliderFloat("Volume", &vol, 0.0f, 1.0f)) {
             audioEngine.oscillators[i]->volume.store(vol);
         }
         if (ImGui::Button("Remove")) oscToRemove = i;
@@ -37,11 +42,13 @@ void renderGUI(AudioEngine& audioEngine) {
         oscToRemove = -1;
     }
 
-    ImGui::Checkbox("Filter passthrough", &audioEngine.filter.passthrough);
-    float cutoff = audioEngine.filter.frequency.load();
+    ImGui::Checkbox("Filter passthrough", &audioEngine.filterL.passthrough);
+    float cutoff = audioEngine.filterL.frequency.load();
     if (ImGui::SliderFloat("Filter cutoff", &cutoff, 20.0f, 20000.0f, NULL, ImGuiSliderFlags_Logarithmic)) {
-        audioEngine.filter.frequency.store(cutoff);
-        audioEngine.filter.updateAlpha();
+        audioEngine.filterL.frequency.store(cutoff);
+        audioEngine.filterL.updateAlpha();
+        audioEngine.filterR.frequency.store(cutoff);
+        audioEngine.filterR.updateAlpha();
     }
 
     //ImGui::Text("Master Volume");

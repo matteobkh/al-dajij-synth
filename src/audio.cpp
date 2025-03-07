@@ -34,36 +34,42 @@ static int paCallback( const void *inputBuffer, void *outputBuffer,
 
     for(i=0; i<framesPerBuffer; i++)
     {
-        float mix = 0;
+        float left = 0.;
+        float right = 0.;
         // Sum all oscillators in bank
         for(auto& osc : data->oscillators) {
             float vol = osc->volume.load();
             switch(osc->waveform){
                 case SINEW:
-                    mix += osc->sine() * vol;
+                    left += osc->sine() * vol * (1-(osc->pan));
+                    right += osc->sine() * vol * osc->pan;
                     break;
                 case SQUAREW:
-                    mix += osc->square() * vol;
+                    left += osc->square() * vol * (1-(osc->pan));
+                    right += osc->square() * vol * osc->pan;
                     break;
                 case SAWW:
-                    mix += osc->saw() * vol;
+                    left += osc->saw() * vol * (1-(osc->pan));
+                    right += osc->saw() * vol * osc->pan;
                     break;
             }
             osc->incrementPhase();
         }
 
         // Apply filter
-        mix = data->filter.process(mix);
+        left = data->filterL.process(left);
+        right = data->filterR.process(right);
 
         // Apply master volume
-        mix *= data->masterVolume.load();
+        left *= data->masterVolume.load();
+        right *= data->masterVolume.load();
 
-        *out++ = mix; /* left */
-        *out++ = mix;  /* right */
+        *out++ = left; /* left */
+        *out++ = right;  /* right */
 
         // Store samples for visualization (thread-safe)
         std::lock_guard<std::mutex> lock(audioMutex);
-        audioBuffer[i % FRAMES_PER_BUFFER] = mix; // Circular buffer effect
+        audioBuffer[i % FRAMES_PER_BUFFER] = left + right; // Circular buffer effect
     }
 
     return paContinue;

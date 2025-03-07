@@ -12,7 +12,7 @@
 struct AudioEngine {
     int sampleRate;
     std::vector<std::shared_ptr<Oscillator>> oscillators; // Oscillator bank 
-    LowPassFilter filter;  // Single-pole low-pass filter
+    LowPassFilter filterL, filterR;  // Single-pole low-pass filter
 
     // room for more objects
 
@@ -20,14 +20,14 @@ struct AudioEngine {
 
     // Constructor, please specify sample rate
     AudioEngine(int sr, float vol = 1.0f)
-        : sampleRate(sr), filter(sr), masterVolume(vol) {
+        : sampleRate(sr), filterL(sr), filterR(sr), masterVolume(vol) {
             std::cout << "AudioEngine created: sampleRate = " 
                 << sampleRate << std::endl;
         }
 
     //
-    void addOscillator(float freq = 440.0f, float vol = 0.5f, float p = .0f, int wf = 0) {
-        oscillators.push_back(std::make_shared<Oscillator>(sampleRate, freq, vol, p, wf));
+    void addOscillator() {
+        oscillators.push_back(std::make_shared<Oscillator>(sampleRate));
     }
     void removeOscillator(int index) {
         oscillators.erase(oscillators.begin() + index);

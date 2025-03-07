@@ -16,13 +16,14 @@ struct Oscillator {
     int sampleRate;
     std::atomic<float> frequency;
     std::atomic<float> volume;
+    std::atomic<float> pan;
     float phase;
     int waveform;
 
     // Constructor for oscillator struct
-    Oscillator(int sr, float freq = 440.0f, float vol = 0.5f, float p = .0f, int wf = 0) 
-        : sampleRate(sr), frequency(freq), volume(vol), phase(p), waveform(wf) {}
-    
+    Oscillator(int sr, float freq = 440.0f, float vol = 0.5f, float pn = 0.5, float p = .0f, int wf = 0) 
+        : sampleRate(sr), frequency(freq), volume(vol), pan(pn), phase(p), waveform(wf) {}
+
     // Sinusoidal waveform
     float sine() {
         return sinf(2.0f * M_PI * phase);

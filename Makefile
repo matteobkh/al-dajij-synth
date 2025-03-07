@@ -1,4 +1,4 @@
-# MAKEFILE FOR MACOS ONLY #
+# MAKEFILE FOR MACOS AND LINUX #
 
 CXX = g++
 
@@ -22,22 +22,41 @@ SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl2.cpp \
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 #OBJS = $(SOURCES:%.cpp=%.o)
 
+UNAME_S := $(shell uname -s)
+
 # Build flags, includes, links
 CXXFLAGS = -std=c++11 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
-CXXFLAGS += -I$(PA_DIR)/include 
+CXXFLAGS += -I$(PA_DIR)/include
 CXXFLAGS += -I./include
 CXXFLAGS += -g -Wall -Wformat -pthread
 
-LIBS = -framework OpenGL -framework Cocoa -framework IOKit \
+##---------------------------------------------------------------------
+## BUILD FLAGS PER PLATFORM
+##---------------------------------------------------------------------
+
+LIBS = $(PA_DIR)/lib/.libs/libportaudio.a
+
+ifeq ($(UNAME_S), Linux) #LINUX
+	ECHO_MESSAGE = "Linux"
+	LIBS += -lGL -ldl `sdl2-config --libs` -lrt -lasound -ljack -lpulse
+
+	CXXFLAGS += `sdl2-config --cflags`
+endif
+
+ifeq ($(UNAME_S), Darwin) #APPLE
+	ECHO_MESSAGE = "Mac OS X"
+	LIBS += -framework OpenGL -framework Cocoa -framework IOKit \
 	-framework CoreVideo -framework CoreAudio -framework AudioToolbox \
 	-framework AudioUnit -framework CoreServices \
-	$(shell sdl2-config --libs) \
-	$(PA_DIR)/lib/.libs/libportaudio.a
+	$(shell sdl2-config --libs)
 
-CXXFLAGS += `sdl2-config --cflags`
-CXXFLAGS += -I/usr/local/include -I/opt/local/include
+	CXXFLAGS += `sdl2-config --cflags`
+	CXXFLAGS += -I/usr/local/include -I/opt/local/include
+endif
 
+##---------------------------------------------------------------------
 ## BUILD RULES
+##---------------------------------------------------------------------
 
 %.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
