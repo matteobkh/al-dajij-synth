@@ -2,6 +2,7 @@
 #include "gui.h"
 #include "imgui.h"
 #include "audio.h"
+#include "imgui-knobs.h"
 #include <mutex>
 
 // Oscillator bank window
@@ -19,14 +20,30 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::RadioButton("Sine", wf, 0);   ImGui::SameLine();
         ImGui::RadioButton("Square", wf, 1); ImGui::SameLine();
         ImGui::RadioButton("Saw", wf, 2);
-        if (ImGui::SliderFloat("Freq", &freq, 20.0f, 5000.0f, NULL, ImGuiSliderFlags_Logarithmic)) {
+        // Frequency knob
+        if (ImGuiKnobs::Knob("Frequency", &freq, 20.0f, 5000.0f, 0.0f, "%.2f Hz", ImGuiKnobVariant_WiperDot, 0, ImGuiKnobFlags_Logarithmic)) {
             audioEngine.oscillators[i]->frequency.store(freq);
         }
-        ImGui::Text("L"); ImGui::SameLine();
-        if (ImGui::SliderFloat("R", &pan, 0.0f, 1.0f)) {
+        if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
+            freq = 440;
+            audioEngine.oscillators[i]->frequency.store(freq);
+        }
+        ImGui::SameLine();
+        // Pan knob
+        if (ImGuiKnobs::Knob("Pan", &pan, 0.0f, 1.0f, 0.0f, "%.2f", ImGuiKnobVariant_WiperDot)) {
             audioEngine.oscillators[i]->pan.store(pan);
         }
-        if (ImGui::SliderFloat("Volume", &vol, 0.0f, 1.0f)) {
+        if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
+            pan = 0.5;
+            audioEngine.oscillators[i]->pan.store(pan);
+        }
+        ImGui::SameLine();
+        // Volume knob
+        if (ImGuiKnobs::Knob("Volume", &vol, 0.0f, 1.0f, 0.0f, "%.2f", ImGuiKnobVariant_WiperDot)) {
+            audioEngine.oscillators[i]->volume.store(vol);
+        }
+        if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
+            vol = 0.5;
             audioEngine.oscillators[i]->volume.store(vol);
         }
         if (ImGui::Button("Remove")) oscToRemove = i;

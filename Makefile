@@ -9,6 +9,7 @@ EXEC = audioAppGuiTest
 SRC_DIR = ./src
 PA_DIR = ./libs/portaudio
 IMGUI_DIR = ./libs/imgui
+IMGUI_KNOBS_DIR = ./libs/imgui-knobs
 
 # Source files
 SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/audio.cpp $(SRC_DIR)/gui.cpp 
@@ -17,6 +18,7 @@ SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp \
 	$(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl2.cpp \
 	$(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
+SOURCES += $(IMGUI_KNOBS_DIR)/imgui-knobs.cpp
 
 # Objects, compiles .o files first
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
@@ -26,7 +28,7 @@ UNAME_S := $(shell uname -s)
 
 # Build flags, includes, links
 CXXFLAGS = -std=c++11 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
-CXXFLAGS += -I$(PA_DIR)/include
+CXXFLAGS += -I$(IMGUI_KNOBS_DIR) -I$(PA_DIR)/include
 CXXFLAGS += -I./include
 CXXFLAGS += -g -Wall -Wformat -pthread
 
@@ -65,6 +67,9 @@ endif
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(IMGUI_DIR)/backends/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+%.o:$(IMGUI_KNOBS_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(EXEC): $(OBJS)
