@@ -1,15 +1,29 @@
-// gui.cpp
 #include "gui.h"
 #include "imgui.h"
 #include "audio.h"
 #include "imgui-knobs.h"
 #include <mutex>
 
+// knob speeds for coarse and fine tuning
+#define FAST (0.0f)
+#define SLOW (0.0003f)
+
 // Oscillator bank window
 void renderGUI(AudioEngine& audioEngine) {
     ImGui::Begin("Oscillator Control");
 
     static int oscToRemove = -1;
+
+    // Toggle fine tuning knobs
+    float knobSpeed = FAST;
+    ImGui::GetIO();
+    if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl)) {
+        knobSpeed = SLOW;
+    } else {
+        knobSpeed = FAST;
+    }
+
+    // Render oscillator bank
     for (size_t i = 0; i < audioEngine.oscillators.size(); i++) {
         ImGui::PushID(i);
         ImGui::Text("Oscillator %d", (int)i+1);
@@ -17,11 +31,11 @@ void renderGUI(AudioEngine& audioEngine) {
         float pan = audioEngine.oscillators[i]->pan.load();
         float vol = audioEngine.oscillators[i]->volume.load();
         int* wf = &(audioEngine.oscillators[i]->waveform);
-        ImGui::RadioButton("Sine", wf, 0);   ImGui::SameLine();
-        ImGui::RadioButton("Square", wf, 1); ImGui::SameLine();
-        ImGui::RadioButton("Saw", wf, 2);
+        ImGui::RadioButton("Sine", wf, SINEW);   ImGui::SameLine();
+        ImGui::RadioButton("Square", wf, SQUAREW); ImGui::SameLine();
+        ImGui::RadioButton("Saw", wf, SAWW);
         // Frequency knob
-        if (ImGuiKnobs::Knob("Frequency", &freq, 20.0f, 5000.0f, 0.0f, "%.2f Hz", ImGuiKnobVariant_WiperDot, 0, ImGuiKnobFlags_Logarithmic)) {
+        if (ImGuiKnobs::Knob("Frequency", &freq, 20.0f, 5000.0f, knobSpeed * 5000, "%.2f Hz", ImGuiKnobVariant_WiperDot, 0, ImGuiKnobFlags_Logarithmic)) {
             audioEngine.oscillators[i]->frequency.store(freq);
         }
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
@@ -30,7 +44,7 @@ void renderGUI(AudioEngine& audioEngine) {
         }
         ImGui::SameLine();
         // Pan knob
-        if (ImGuiKnobs::Knob("Pan", &pan, 0.0f, 1.0f, 0.0f, "%.2f", ImGuiKnobVariant_WiperDot)) {
+        if (ImGuiKnobs::Knob("Pan", &pan, 0.0f, 1.0f, knobSpeed, "%.2f", ImGuiKnobVariant_WiperDot)) {
             audioEngine.oscillators[i]->pan.store(pan);
         }
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
@@ -39,14 +53,15 @@ void renderGUI(AudioEngine& audioEngine) {
         }
         ImGui::SameLine();
         // Volume knob
-        if (ImGuiKnobs::Knob("Volume", &vol, 0.0f, 1.0f, 0.0f, "%.2f", ImGuiKnobVariant_WiperDot)) {
+        if (ImGuiKnobs::Knob("Volume", &vol, 0.0f, 1.0f, knobSpeed, "%.2f", ImGuiKnobVariant_WiperDot)) {
             audioEngine.oscillators[i]->volume.store(vol);
         }
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
             vol = 0.5;
             audioEngine.oscillators[i]->volume.store(vol);
         }
-        if (ImGui::Button("Remove")) oscToRemove = i;
+        if (ImGui::Button("Remove")) 
+            oscToRemove = i;
         ImGui::PopID();
     }
     
@@ -59,18 +74,28 @@ void renderGUI(AudioEngine& audioEngine) {
         oscToRemove = -1;
     }
 
-    ImGui::Checkbox("Filter passthrough", &audioEngine.filterL.passthrough);
+    // Filter
+    bool passthrough = audioEngine.filterL.passthrough;
+    if(ImGui::Checkbox("Filter passthrough", &passthrough)) {
+        audioEngine.filterL.passthrough = audioEngine.filterR.passthrough = passthrough;
+    }
     float cutoff = audioEngine.filterL.frequency.load();
-    if (ImGui::SliderFloat("Filter cutoff", &cutoff, 20.0f, 20000.0f, NULL, ImGuiSliderFlags_Logarithmic)) {
+    if (ImGuiKnobs::Knob("Filter cutoff", &cutoff, 20.0f, 20000.0f, knobSpeed * 20000, "%.2f", ImGuiKnobVariant_WiperDot, 0, ImGuiKnobFlags_Logarithmic)) {
         audioEngine.filterL.frequency.store(cutoff);
         audioEngine.filterL.updateAlpha();
         audioEngine.filterR.frequency.store(cutoff);
         audioEngine.filterR.updateAlpha();
     }
 
-    //ImGui::Text("Master Volume");
+    ImGui::SameLine();
+
+    // Volume knob
     float mVol = audioEngine.masterVolume.load();
-    if (ImGui::SliderFloat("Master Volume", &mVol, 0.0f, 1.0f)) {
+    if (ImGuiKnobs::Knob("Master Volume", &mVol, 0.0f, 1.0f, knobSpeed, "%.2f", ImGuiKnobVariant_WiperDot)) {
+        audioEngine.masterVolume.store(mVol);
+    }
+    if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
+        mVol = 1;
         audioEngine.masterVolume.store(mVol);
     }
 

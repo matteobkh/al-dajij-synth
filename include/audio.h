@@ -8,6 +8,12 @@
 #include "audioengine.h"
 #include "portaudio.h"
 
+enum Waveforms {
+    SINEW,
+    SQUAREW,
+    SAWW
+};
+
 extern std::vector<float> audioBuffer;  // Shared buffer for waveform visualization
 extern std::mutex audioMutex;           // Protects buffer access
 

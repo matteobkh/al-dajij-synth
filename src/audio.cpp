@@ -1,14 +1,9 @@
-
 #include "portaudio.h"
 #include "oscillator.h"
 #include "audio.h"
 #include "audioengine.h"
 
 #define FRAMES_PER_BUFFER  (256)
-
-#define SINEW  (0)
-#define SQUAREW  (1)
-#define SAWW  (2)
 
 static PaStream* stream;
 
@@ -19,11 +14,7 @@ static int paCallback( const void *inputBuffer, void *outputBuffer,
                             unsigned long framesPerBuffer,
                             const PaStreamCallbackTimeInfo* timeInfo,
                             PaStreamCallbackFlags statusFlags,
-                            void *userData )
-{
-    /* std::vector<std::shared_ptr<Oscillator>>* data = 
-        static_cast<std::vector<std::shared_ptr<Oscillator>>*>(userData);
-    std::vector<std::shared_ptr<Oscillator>> d = *data; */
+                            void *userData ) {
     AudioEngine* data = static_cast<AudioEngine*>(userData);
     float *out = (float*)outputBuffer;
     unsigned long i;
@@ -32,8 +23,7 @@ static int paCallback( const void *inputBuffer, void *outputBuffer,
     (void) statusFlags;
     (void) inputBuffer;
 
-    for(i=0; i<framesPerBuffer; i++)
-    {
+    for(i=0; i<framesPerBuffer; i++) {
         float left = 0.;
         float right = 0.;
         // Sum all oscillators in bank
