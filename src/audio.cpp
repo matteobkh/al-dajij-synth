@@ -47,8 +47,7 @@ static int paCallback( const void *inputBuffer, void *outputBuffer,
         }
 
         // Apply filter
-        left = data->filterL.process(left);
-        right = data->filterR.process(right);
+        data->filter.processStereo(left, right);
 
         // Apply master volume
         left *= data->masterVolume.load();

@@ -75,17 +75,18 @@ void renderGUI(AudioEngine& audioEngine) {
     }
 
     // Filter
-    bool passthrough = audioEngine.filterL.passthrough;
+    bool passthrough = audioEngine.filter.passthrough;
     if(ImGui::Checkbox("Filter passthrough", &passthrough)) {
-        audioEngine.filterL.passthrough = audioEngine.filterR.passthrough = passthrough;
+        audioEngine.filter.passthrough = passthrough;
     }
-    float cutoff = audioEngine.filterL.frequency.load();
-    if (ImGuiKnobs::Knob("Filter cutoff", &cutoff, 20.0f, 20000.0f, knobSpeed * 20000, "%.2f", ImGuiKnobVariant_WiperDot, 0, ImGuiKnobFlags_Logarithmic)) {
-        audioEngine.filterL.frequency.store(cutoff);
-        audioEngine.filterL.updateAlpha();
-        audioEngine.filterR.frequency.store(cutoff);
-        audioEngine.filterR.updateAlpha();
+    float cutoff = audioEngine.filter.frequency.load();
+    if (ImGuiKnobs::Knob("Cutoff", &cutoff, 20.0f, 20000.0f, knobSpeed * 20000, "%.2f", ImGuiKnobVariant_WiperDot, 0, ImGuiKnobFlags_Logarithmic)) {
+        audioEngine.filter.frequency.store(cutoff);
+        audioEngine.filter.updateAlpha();
     }
+    ImGui::SameLine();
+    // if you change the max n of poles please change the last 3 variables here:
+    ImGuiKnobs::KnobInt("# Poles", &audioEngine.filter.nPoles, 1, 4, 0.1, "%i", ImGuiKnobVariant_Stepped,0,0,4,3.5,6);
 
     ImGui::SameLine();
 

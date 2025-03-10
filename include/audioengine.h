@@ -12,7 +12,7 @@
 struct AudioEngine {
     int sampleRate;
     std::vector<std::shared_ptr<Oscillator>> oscillators; // Oscillator bank 
-    LowPassFilter filterL, filterR;  // Single-pole low-pass filters for both channels
+    LowPassFilter filter;  // low pass filter
 
     // room for more objects
 
@@ -20,7 +20,7 @@ struct AudioEngine {
 
     // Constructor, please specify sample rate
     AudioEngine(int sr, float vol = 1.0f)
-        : sampleRate(sr), filterL(sr), filterR(sr), masterVolume(vol) {
+        : sampleRate(sr), filter(sr), masterVolume(vol) {
             std::cout << "AudioEngine created: sampleRate = " 
                 << sampleRate << std::endl;
         }
